@@ -9,14 +9,14 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100">
-  <div id="root"></div>
+  <div id="root" class="min-h-screen flex items-center justify-center text-gray-700">Laden...</div>
 
+  <!-- Firebase laden -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc } 
-      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // 🔧 VUL JE EIGEN FIREBASE CONFIG IN
+    // 👇 JOUW FIREBASE CONFIG HIER INZETTEN
     const firebaseConfig = {
       apiKey: "AIzaSyANagQLGcXVqIEd-aAsXyjkVOu6huJ-BRA",
   authDomain: "renault-zoe-reservering.firebaseapp.com",
@@ -28,229 +28,45 @@
   measurementId: "G-KB9BP46QXN"
     };
 
+    // Firebase initialiseren en beschikbaar maken op window
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    window.db = getFirestore(app);
+  </script>
 
+  <!-- React-code (gewoon script, zodat React zichtbaar is) -->
+  <script>
     const { useState, useEffect } = React;
 
-    function SharedCarBooking() {
-      const [bookings, setBookings] = useState([]);
-      const [selectedFamily, setSelectedFamily] = useState('Nico & Gisela');
-      const [selectedDate, setSelectedDate] = useState('');
-      const [startTime, setStartTime] = useState('');
-      const [endTime, setEndTime] = useState('');
-      const [purpose, setPurpose] = useState('');
-      const [showForm, setShowForm] = useState(false);
-      const [loading, setLoading] = useState(true);
+    function App() {
+      const [count, setCount] = useState(0);
+      const [dbReady, setDbReady] = useState(false);
 
-      const families = ['Nico & Gisela', 'Malouk, Ananta & Jona', 'Pieter & Eva'];
-      const familyColors = {
-        'Nico & Gisela': 'bg-blue-500',
-        'Malouk, Ananta & Jona': 'bg-green-500',
-        'Pieter & Eva': 'bg-purple-500'
-      };
-
-      // 🔹 Boekingen laden uit Firestore
-      async function loadBookings() {
-        const querySnapshot = await getDocs(collection(db, "bookings"));
-        const loaded = querySnapshot.docs.map(doc => doc.data());
-        setBookings(
-          loaded.sort((a, b) => new Date(a.date + " " + a.startTime) - new Date(b.date + " " + b.startTime))
-        );
-        setLoading(false);
-      }
-
-      // 🔹 Boekingen ophalen bij laden
       useEffect(() => {
-        loadBookings();
+        // check of Firestore beschikbaar is
+        if (window.db) {
+          setDbReady(true);
+        }
       }, []);
 
-      // 🔹 Toevoegen aan Firestore
-      async function addBooking() {
-        if (!selectedDate || !startTime || !endTime) {
-          alert("Vul alle velden in!");
-          return;
-        }
-
-        const newBooking = {
-          id: Date.now().toString(),
-          family: selectedFamily,
-          date: selectedDate,
-          startTime,
-          endTime,
-          purpose: purpose || "Geen doel opgegeven"
-        };
-
-        await setDoc(doc(db, "bookings", newBooking.id), newBooking);
-        setBookings([...bookings, newBooking].sort((a, b) => 
-          new Date(a.date + " " + a.startTime) - new Date(b.date + " " + b.startTime)
-        ));
-        setSelectedDate('');
-        setStartTime('');
-        setEndTime('');
-        setPurpose('');
-        setShowForm(false);
-      }
-
-      // 🔹 Verwijderen uit Firestore
-      async function deleteBooking(id) {
-        await deleteDoc(doc(db, "bookings", id));
-        setBookings(bookings.filter(b => b.id !== id));
-      }
-
-      const formatDate = (dateStr) => {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
-      };
-
-      const isUpcoming = (booking) => {
-        const bookingDateTime = new Date(booking.date + " " + booking.startTime);
-        return bookingDateTime >= new Date();
-      };
-
-      const upcomingBookings = bookings.filter(isUpcoming);
-      const pastBookings = bookings.filter(b => !isUpcoming(b));
-
-      if (loading) {
-        return (
-          <div className="min-h-screen flex items-center justify-center text-xl text-gray-600">Laden...</div>
-        );
-      }
-
       return (
-        <div className="min-h-screen p-4 md:p-8">
-          <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-indigo-600 p-3 rounded-xl">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                  </svg>
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-800">Renault Zoë</h1>
-                  <p className="text-gray-600">Reserveringssysteem voor 3 gezinnen</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowForm(!showForm)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-colors"
-              >
-                <span className="text-xl">{showForm ? '✕' : '+'}</span>
-                {showForm ? 'Annuleren' : 'Reserveren'}
-              </button>
-            </div>
-
-            {/* Formulier */}
-            {showForm && (
-              <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Nieuwe Reservering</h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Gezin</label>
-                    <select
-                      value={selectedFamily}
-                      onChange={(e) => setSelectedFamily(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    >
-                      {families.map(f => <option key={f}>{f}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Datum</label>
-                    <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Van</label>
-                    <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Tot</label>
-                    <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Doel (optioneel)</label>
-                    <input type="text" value={purpose} onChange={(e) => setPurpose(e.target.value)}
-                      placeholder="Bijv. boodschappen, uitstapje..."
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg" />
-                  </div>
-                </div>
-                <button
-                  onClick={addBooking}
-                  className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium"
-                >
-                  Reservering Toevoegen
-                </button>
-              </div>
-            )}
-
-            {/* Komende reserveringen */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">📅 Komende Reserveringen</h2>
-              {upcomingBookings.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">Geen komende reserveringen</p>
-              ) : (
-                <div className="space-y-3">
-                  {upcomingBookings.map(b => (
-                    <div key={b.id}
-                      className={`border-l-4 pl-4 py-3 rounded-r-lg bg-gray-50 hover:bg-gray-100 ${
-                        b.family === 'Nico & Gisela' ? 'border-blue-500' :
-                        b.family === 'Malouk, Ananta & Jona' ? 'border-green-500' : 'border-purple-500'
-                      }`}>
-                      <div className="flex justify-between">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`${familyColors[b.family]} text-white px-3 py-1 rounded-full text-sm font-medium`}>
-                              {b.family}
-                            </span>
-                            <span className="text-gray-600 font-medium">{formatDate(b.date)}</span>
-                          </div>
-                          <div className="text-gray-700">
-                            <span className="font-semibold">{b.startTime}</span> - <span className="font-semibold">{b.endTime}</span>
-                          </div>
-                          <div className="text-gray-600 text-sm mt-1">{b.purpose}</div>
-                        </div>
-                        <button onClick={() => deleteBooking(b.id)} className="text-red-500 hover:text-red-700 p-2">
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Afgelopen reserveringen */}
-            {pastBookings.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-lg p-6 opacity-60">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Afgelopen Reserveringen</h2>
-                {pastBookings.slice(0, 5).map(b => (
-                  <div key={b.id}
-                    className={`border-l-4 pl-4 py-2 rounded-r-lg bg-gray-50 mb-2 ${
-                      b.family === 'Nico & Gisela' ? 'border-blue-500' :
-                      b.family === 'Malouk, Ananta & Jona' ? 'border-green-500' : 'border-purple-500'
-                    }`}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`${familyColors[b.family]} text-white px-3 py-1 rounded-full text-sm font-medium`}>
-                        {b.family}
-                      </span>
-                      <span className="text-gray-600 font-medium">{formatDate(b.date)}</span>
-                    </div>
-                    <div className="text-gray-700 text-sm">{b.startTime} - {b.endTime}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-4">🔥 Renault Zoë test</h1>
+          <p className="mb-4">
+            {dbReady
+              ? "✅ Verbinding met Firebase is actief"
+              : "⏳ Wachten op Firebase..."}
+          </p>
+          <button
+            onClick={() => setCount(count + 1)}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+          >
+            Kliks: {count}
+          </button>
         </div>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<SharedCarBooking />);
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
   </script>
 </body>
 </html>
