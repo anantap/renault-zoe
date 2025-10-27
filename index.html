@@ -15,6 +15,17 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        const firebaseConfig = {
+  apiKey: "AIzaSyANagQLGcXVqIEd-aAsXyjkVOu6huJ-BRA",
+  authDomain: "renault-zoe-reservering.firebaseapp.com",
+  databaseURL: "https://renault-zoe-reservering-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "renault-zoe-reservering",
+  storageBucket: "renault-zoe-reservering.firebasestorage.app",
+  messagingSenderId: "191528896393",
+  appId: "1:191528896393:web:e9e0fecb4ff7c39a1b8358",
+  measurementId: "G-KB9BP46QXN"
+};
+        
         const SharedCarBooking = () => {
           const [bookings, setBookings] = useState([]);
           const [selectedFamily, setSelectedFamily] = useState('Nico & Gisela');
