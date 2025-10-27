@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Renault Zoë Test</title>
+    <title>Renault Zoë – Test</title>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,33 +12,30 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-    <!-- ✅ Firebase compat (stabiele versie 10.12.5) -->
-    <script src="firebase-app-compat.js"></script>
-<script src="firebase-firestore-compat.js"></script>
+    <!-- ✅ Firebase compat van jsDelivr (stabiele mirror) -->
+    <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.5/compat/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.5/compat/firestore.js"></script>
   </head>
 
   <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center">
     <div id="root" class="text-center text-gray-700">Laden...</div>
 
     <script>
-      // --- Firebase config (vervang met jouw gegevens) ---
+      // --- Firebase config: vul hier je eigen waarden in ---
       const firebaseConfig = {
-        apiKey: "AIzaSyANagQLGcXVqIEd-aAsXyjkVOu6huJ-BRA",
-  authDomain: "renault-zoe-reservering.firebaseapp.com",
-  databaseURL: "https://renault-zoe-reservering-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "renault-zoe-reservering",
-  storageBucket: "renault-zoe-reservering.firebasestorage.app",
-  messagingSenderId: "191528896393",
-  appId: "1:191528896393:web:e9e0fecb4ff7c39a1b8358",
-  measurementId: "G-KB9BP46QXN"
+        apiKey: "JOUW_API_KEY",
+        authDomain: "jouw-project.firebaseapp.com",
+        projectId: "jouw-project-id",
+        storageBucket: "jouw-project.appspot.com",
+        messagingSenderId: "xxxxxxxxxxxx",
+        appId: "1:xxxxxxxxxxxx:web:xxxxxxxxxxxxxxxx"
       };
 
       // --- Init Firebase ---
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
-      console.log("Firebase geladen:", db);
+      console.log("✅ Firebase geladen via jsDelivr:", db);
 
-      // --- React component ---
       const { useState, useEffect } = React;
 
       function App() {
@@ -58,8 +55,8 @@
             <h1 className="text-3xl font-bold mb-4">🚗 Renault Zoë werkt!</h1>
             <p className="mb-3">
               {connected
-                ? "✅ Verbonden met Firebase"
-                : "⏳ Nog geen verbinding..."}
+                ? "✅ Verbonden met Firestore"
+                : "⏳ Verbinden met Firebase..."}
             </p>
             <button
               onClick={() => setCount(count + 1)}
