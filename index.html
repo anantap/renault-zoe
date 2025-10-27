@@ -3,62 +3,62 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Renault Zoë - Reserveringssysteem</title>
+  <title>Renault Zoë – Reserveringssysteem</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- ✅ Firebase klassiek laden -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore-compat.js"></script>
 </head>
+
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100">
   <div id="root" class="min-h-screen flex items-center justify-center text-gray-700">Laden...</div>
 
-  <!-- Firebase laden -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-    // 👇 JOUW FIREBASE CONFIG HIER INZETTEN
+  <script>
+    // 🔧 Firebase configureren (vervang deze waardes met je eigen)
     const firebaseConfig = {
-      apiKey: "AIzaSyANagQLGcXVqIEd-aAsXyjkVOu6huJ-BRA",
-  authDomain: "renault-zoe-reservering.firebaseapp.com",
-  databaseURL: "https://renault-zoe-reservering-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "renault-zoe-reservering",
-  storageBucket: "renault-zoe-reservering.firebasestorage.app",
-  messagingSenderId: "191528896393",
-  appId: "1:191528896393:web:e9e0fecb4ff7c39a1b8358",
-  measurementId: "G-KB9BP46QXN"
+      apiKey: "JOUW_API_KEY",
+      authDomain: "jouw-project.firebaseapp.com",
+      projectId: "jouw-project-id",
+      storageBucket: "jouw-project.appspot.com",
+      messagingSenderId: "xxxxxxxxxxxx",
+      appId: "1:xxxxxxxxxxxx:web:xxxxxxxxxxxxxxxx"
     };
 
-    // Firebase initialiseren en beschikbaar maken op window
-    const app = initializeApp(firebaseConfig);
-    window.db = getFirestore(app);
-  </script>
+    // Initialiseren
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-  <!-- React-code (gewoon script, zodat React zichtbaar is) -->
-  <script>
+    console.log("✅ Firebase geladen:", db);
+
     const { useState, useEffect } = React;
 
     function App() {
       const [count, setCount] = useState(0);
-      const [dbReady, setDbReady] = useState(false);
+      const [connected, setConnected] = useState(false);
 
       useEffect(() => {
-        // check of Firestore beschikbaar is
-        if (window.db) {
-          setDbReady(true);
-        }
+        // Test Firestore-verbinding
+        db.collection("test")
+          .limit(1)
+          .get()
+          .then(() => setConnected(true))
+          .catch(() => setConnected(false));
       }, []);
 
       return (
         <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">🔥 Renault Zoë test</h1>
-          <p className="mb-4">
-            {dbReady
-              ? "✅ Verbinding met Firebase is actief"
-              : "⏳ Wachten op Firebase..."}
+          <h1 className="text-3xl font-bold mb-4">🚗 Renault Zoë</h1>
+          <p className="mb-2">
+            {connected
+              ? "✅ Verbonden met Firebase Firestore"
+              : "⏳ Verbinding maken..."}
           </p>
           <button
             onClick={() => setCount(count + 1)}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 mt-4"
           >
             Kliks: {count}
           </button>
