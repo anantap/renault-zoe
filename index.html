@@ -64,9 +64,11 @@
                   id: key,
                   ...data[key]
                 }));
-                bookingsArray.sort((a, b) => 
-                  new Date(a.date + ' ' + a.startTime) - new Date(b.date + ' ' + b.startTime)
-                );
+                bookingsArray.sort((a, b) => {
+  const dateA = new Date(a.date + 'T' + a.startTime);
+  const dateB = new Date(b.date + 'T' + b.startTime);
+  return dateA - dateB;
+});
                 setBookings(bookingsArray);
               } else {
                 setBookings([]);
