@@ -54,30 +54,30 @@
             'Pieter & Eva': 'bg-purple-500'
           };
 
-          useEffect(() => {
-            // Real-time listener voor bookings
-            const bookingsRef = firebase.database().ref('bookings');
-            bookingsRef.on('value', (snapshot) => {
-              const data = snapshot.val();
-              if (data) {
-                const bookingsArray = Object.keys(data).map(key => ({
-                  id: key,
-                  ...data[key]
-                }));
-                bookingsArray.sort((a, b) => {
-  const dateA = new Date(a.date + 'T' + a.startTime);
-  const dateB = new Date(b.date + 'T' + b.startTime);
-  return dateA - dateB;
-});
-                setBookings(bookingsArray);
-              } else {
-                setBookings([]);
-              }
-              setLoading(false);
-            });
+         useEffect(() => {
+  // Real-time listener voor bookings
+  const bookingsRef = firebase.database().ref('bookings');
+  bookingsRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      const bookingsArray = Object.keys(data).map(key => ({
+        id: key,
+        ...data[key]
+      }));
+      bookingsArray.sort((a, b) => {
+        const dateA = new Date(a.date + 'T' + a.startTime);
+        const dateB = new Date(b.date + 'T' + b.startTime);
+        return dateA - dateB;
+      });
+      setBookings(bookingsArray);
+    } else {
+      setBookings([]);
+    }
+    setLoading(false);
+  });
 
-            return () => bookingsRef.off();
-          }, []);
+  return () => bookingsRef.off();
+}, []);
 
           const addBooking = async () => {
             if (!selectedDate) {
